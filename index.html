@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<!-- BTC Monitor — Built 2026-03-01 01:33:03 -->
-<!-- Source: 14 JS modules + 1 CSS -->
+<!-- BTC Monitor v6 — Built 2026-03-02 06:17:58 -->
 
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BTC Monitor v5</title>
+<title>BTC Monitor v6</title>
 <style>
 /* ============================================================
    STYLES.CSS — BTC Monitor
@@ -515,44 +514,6 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
 .rsi-mini-svg { width:100%; height:36px; margin:4px 0 2px; border-radius:4px;
   background:rgba(15,18,25,.5); border:1px solid var(--border); }
 
-/* ══════════════════════════════════════
-   내부 서브탭 (봇알림/마켓뷰)
-══════════════════════════════════════ */
-.inner-tabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid var(--bdr);
-  padding-bottom: 4px;
-}
-.inner-tab {
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--dim);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: all .15s;
-  margin-bottom: -5px;
-}
-.inner-tab.on {
-  color: var(--fg);
-  border-bottom-color: var(--amber);
-}
-.inner-tab:hover { color: var(--fg); }
-
-.inner-pane { display: none; }
-.inner-pane.on { display: block; }
-
-/* ── 가격 알림 / S/R 알림 공통 ── */
-.kind-entry, .kind-cross {
-  font-size: 9px !important;
-  padding: 1px 5px !important;
-  border-radius: 3px !important;
-}
-
 </style>
 <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
 </head>
@@ -560,7 +521,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
 
 <div class="top">
   <div class="top-left">
-    <div class="logo">BTC MONITOR</div>
+    <div class="logo">BTC MONITOR <span style="font-size:11px;color:var(--dim);font-family:var(--mono)">v6</span></div>
     <div class="badge badge-live"><div class="dot"></div>LIVE</div>
   </div>
   <div class="top-right">
@@ -572,7 +533,6 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
 
 <div class="toast-box" id="toasts"></div>
 
-<!-- 설정 모달 -->
 <div class="modal-backdrop" id="settingsModal" onclick="if(event.target===this)App.closeSettings()">
   <div class="modal">
     <h3>⚙️ 설정</h3>
@@ -590,7 +550,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
 </div>
 
 <div class="wrap">
-  <!-- ═══ 탭 8개 (v5) ═══ -->
+  <!-- ═══ 탭 8개 (v5 구조 유지) ═══ -->
   <div class="tabs">
     <button class="tab on"  onclick="App.go(0)">오늘</button>
     <button class="tab"     onclick="App.go(1)">차트</button>
@@ -607,13 +567,13 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
     <div id="loadToday" class="ld"><div class="sp"></div><div style="margin-top:6px">로딩 중...</div></div>
     <div id="today" style="display:none">
       <div class="c">
-        <div class="c-title">📅 L1 — 기본 지지 / 저항 (0.382 ~ 0.500 × ATR)</div>
+        <div class="c-title">📅 L1 — 기본 지지 / 저항 (0.5 × ATR)</div>
         <div class="zone r">
           <div class="zl">저항 L1</div>
           <div class="zv"><span id="R2">-</span><span class="sep">~</span><span id="R1">-</span></div>
         </div>
         <div class="pivot-row">
-          <div class="pivot-label">▶ CENTER (HMA 200 · 15m)</div>
+          <div class="pivot-label">▶ CENTER (일봉 시가 · 09:00 KST)</div>
           <div class="pivot-val" id="mCenter">-</div>
         </div>
         <div class="zone s">
@@ -621,51 +581,45 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           <div class="zv"><span id="S2">-</span><span class="sep">~</span><span id="S1">-</span></div>
         </div>
       </div>
+
       <div class="c">
-        <div class="c-title">📐 L1 Ext — 1차 확장 (0.618 ~ 0.786 × ATR)</div>
-        <div class="zone r-ext">
-          <div class="zl">저항 L1 Ext</div>
-          <div class="zv"><span id="R4">-</span><span class="sep">~</span><span id="R3">-</span></div>
-        </div>
-        <div class="zone s-ext">
-          <div class="zl">지지 L1 Ext</div>
-          <div class="zv"><span id="S4">-</span><span class="sep">~</span><span id="S3">-</span></div>
-        </div>
-      </div>
-      <div class="c">
-        <div class="c-title">🔶 L2 — 2차 확장 (1.000 ~ 1.272 × ATR)</div>
+        <div class="c-title">🔶 L2 — 2배 확장 (1.0 × ATR)</div>
         <div class="zone r-l2">
           <div class="zl">저항 L2 <span style="font-weight:400;font-size:9px;color:var(--dim)">· 숏 진입 참고</span></div>
-          <div class="zv"><span id="R6">-</span><span class="sep">~</span><span id="R5">-</span></div>
+          <div class="zv"><span id="R4">-</span><span class="sep">~</span><span id="R3">-</span></div>
         </div>
         <div class="zone s-l2">
           <div class="zl">지지 L2 <span style="font-weight:400;font-size:9px;color:var(--dim)">· 롱 추가진입 참고</span></div>
-          <div class="zv"><span id="S6">-</span><span class="sep">~</span><span id="S5">-</span></div>
+          <div class="zv"><span id="S4">-</span><span class="sep">~</span><span id="S3">-</span></div>
         </div>
         <div style="font-size:10px;color:var(--dim);margin-top:6px;line-height:1.5;padding:0 4px">
-          ※ ATR 1배 이상 확장 · 급변동 시 숏/롱 참고용 · 백테스트 검증 권장
+          ※ L1의 2배 확장 · 급변동 시 숏/롱 참고용
         </div>
       </div>
+
       <div class="c">
-        <div class="c-title">전일 일봉 기준 (Binance BTCUSDT)</div>
+        <div class="c-title">전일 일봉 기준 (Binance BTCUSDT Futures)</div>
         <div class="mg">
           <div class="mc"><div class="k">시가</div><div class="v" id="mO">-</div></div>
           <div class="mc"><div class="k">고가</div><div class="v" id="mH">-</div></div>
           <div class="mc"><div class="k">저가</div><div class="v" id="mL">-</div></div>
           <div class="mc"><div class="k">종가</div><div class="v" id="mC">-</div></div>
-          <div class="mc"><div class="k">ATR Wilder(10)</div><div class="v" id="mA">-</div></div>
+          <div class="mc"><div class="k">ATR(7)</div><div class="v" id="mAI">-</div></div>
+          <div class="mc"><div class="k">ATR(10)</div><div class="v" id="mAO">-</div></div>
+        </div>
+        <div class="mg" style="grid-template-columns:1fr 1fr;margin-top:4px">
           <div class="mc"><div class="k">기준일</div><div class="v" id="mD">-</div></div>
-          <div class="mc"><div class="k">S/R 고정 시각</div><div class="v" id="mSnap" style="color:var(--amber)">-</div></div>
+          <div class="mc"><div class="k">기준시각</div><div class="v" id="mSnap">-</div></div>
         </div>
       </div>
+
       <details class="c" style="cursor:pointer">
-        <summary style="font-size:11px;color:var(--dim);font-weight:700">📐 계산 공식 (v5)</summary>
+        <summary style="font-size:11px;color:var(--dim);font-weight:700">📐 계산 공식 (v6)</summary>
         <div style="margin-top:10px;font-size:11px;color:var(--dim);line-height:2.3;font-family:var(--mono)">
-          <span style="color:var(--amber)">Center = HMA 200 (15분봉 500개)</span><br>
-          <span style="color:var(--amber)">ATR = Wilder(10) on 일봉</span> ← v5 개선<br>
-          <b style="color:var(--red)">L1:</b> ± 0.382×ATR ~ ± 0.500×ATR<br>
-          <b style="color:rgba(231,76,90,.55)">L1 Ext:</b> ± 0.618×ATR ~ ± 0.786×ATR<br>
-          <b style="color:#ff9800">L2:</b> ± 1.000×ATR ~ ± 1.272×ATR
+          <span style="color:var(--amber)">Center = 바이낸스 일봉 시가 (09:00 KST)</span><br>
+          <b style="color:var(--red)">L1:</b> ± 0.500 × SMA_ATR(7) [inner] ~ ± 0.500 × SMA_ATR(10) [outer]<br>
+          <b style="color:#ff9800">L2:</b> ± 1.000 × SMA_ATR(7) [inner] ~ ± 1.000 × SMA_ATR(10) [outer]<br>
+          <span style="color:var(--green);font-size:10px">검증: 24개 날짜 백테스트 오차 112pt (기존 176 대비 36% 개선)</span>
         </div>
       </details>
     </div>
@@ -679,9 +633,8 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
     </div>
     <div class="chart-ctrl-bar">
       <div class="chart-ctrl-left">
-        <button id="btnL1"  class="zone-btn" onclick="App.toggleL1()">L1</button>
-        <button id="btnL1E" class="zone-btn" onclick="App.toggleL1E()">L1 Ext</button>
-        <button id="btnL2"  class="zone-btn l2" onclick="App.toggleL2()">L2</button>
+        <button id="btnL1" class="zone-btn" onclick="App.toggleL1()">L1</button>
+        <button id="btnL2" class="zone-btn l2" onclick="App.toggleL2()">L2</button>
       </div>
       <div class="chart-ctrl-right">
         <input type="date" id="srDateInput" class="date-input">
@@ -692,16 +645,15 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
     <div id="histSrStatus" class="hist-status"></div>
     <div class="chart-wrap">
       <div class="tf-bar">
-        <button class="tf" data-tf="15m">15m</button>
-        <button class="tf on" data-tf="1h">1H</button>
+        <button class="tf on" data-tf="15m">15m</button>
+        <button class="tf" data-tf="1h">1H</button>
         <button class="tf" data-tf="4h">4H</button>
         <button class="tf" data-tf="1d">1D</button>
       </div>
       <div class="chart-legend" id="chart-hma-legend">
-        <div class="leg"><div class="leg-dot" style="background:#991b1b"></div>HMA 200 (15m)</div>
-        <div class="leg"><div class="leg-dot" style="background:#22c55e"></div>HMA 200 (1h)</div>
+        <div class="leg"><div class="leg-dot" style="background:#f59e0b"></div>HMA 200 (15m)</div>
+        <div class="leg"><div class="leg-dot" style="background:#3b82f6"></div>HMA 200 (1h)</div>
         <div class="leg"><div class="leg-dot" style="background:var(--red)"></div>L1</div>
-        <div class="leg"><div class="leg-dot" style="background:rgba(231,76,90,.4)"></div>L1Ext</div>
         <div class="leg"><div class="leg-dot" style="background:#ff9800"></div>L2</div>
       </div>
       <div id="chart"></div>
@@ -713,7 +665,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
     </div>
     <div class="c" style="padding:10px 14px">
       <div style="font-size:11px;color:var(--dim)">
-        💡 빨강선 = 15m HMA 200 (1st MA, entry line) · 초록선 = 1h HMA 200 (2nd MA, trendline) · 박스 = 해당 날짜 구간만 표시
+        💡 <span style="color:#f59e0b">노란선</span> = 15m HMA 200 (1st MA, entry line) · <span style="color:#3b82f6">파란선</span> = 1h HMA 200 (2nd MA, trendline) · 박스 = 해당 날짜 구간만 표시
       </div>
     </div>
   </div>
@@ -726,10 +678,11 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
       <button class="fb"    onclick="History.filter('all',this)">전체</button>
     </div>
     <div id="histLoad" class="ld" style="display:none"><div class="sp"></div></div>
-    <div id="hist-table"></div>
+    <div id="histList" class="scroll"></div>
+    <div id="histEmpty" class="empty" style="display:none"><div class="ei">📊</div>데이터 없음</div>
   </div>
 
-  <!-- ═══ TAB 3: 봇알림 (거래량 + HMA신호 + S/R알림 + 가격알림) ═══ -->
+  <!-- ═══ TAB 3: 봇알림 (HMA신호 + 거래량 + S/R알림 + 가격알림 + 15분급락) ═══ -->
   <div class="pane" id="p3">
     <!-- 내부 서브탭 -->
     <div class="inner-tabs">
@@ -737,15 +690,16 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
       <button class="inner-tab"    onclick="App.innerGo(3,1,this)">🔥 거래량</button>
       <button class="inner-tab"    onclick="App.innerGo(3,2,this)">🎯 구간 알림</button>
       <button class="inner-tab"    onclick="App.innerGo(3,3,this)">💰 가격 알림</button>
+      <button class="inner-tab"    onclick="App.innerGo(3,4,this)">🚨 15분 급락</button>
     </div>
 
     <!-- 3-0: HMA 신호 -->
     <div class="inner-pane on" id="ip3-0">
       <div class="c">
-        <div class="c-title">📊 HMA 크로스 매매 신호 (v5)</div>
+        <div class="c-title">📊 HMA 크로스 매매 신호 (v6)</div>
         <div style="font-size:11px;color:var(--dim);line-height:1.5;margin-bottom:8px">
-          <b style="color:#991b1b">1st MA</b>: 15m HMA 200 (entry line) ×
-          <b style="color:#22c55e">2nd MA</b>: 1h HMA 200 (trendline)<br>
+          <b style="color:#f59e0b">1st MA</b>: 15m HMA 200 (entry line) ×
+          <b style="color:#3b82f6">2nd MA</b>: 1h HMA 200 (trendline)<br>
           🔆 <b>골든크로스</b>: 15m HMA200 상향 돌파 → Long 준비<br>
           💀 <b>데드크로스</b>: 15m HMA200 하향 돌파 → Short 준비<br>
           <span style="color:var(--amber)">Entry</span> 뱃지 = 크로스 + RSI 조건 충족 시 자동 생성
@@ -824,6 +778,36 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
       <div id="price-alert-log" class="scroll" style="max-height:300px"></div>
       <div id="price-alert-log-empty" class="empty" style="display:none"><div class="ei">💰</div>알림 도달 기록</div>
     </div>
+
+    <!-- 3-4: 15분봉 급락 알림 -->
+    <div class="inner-pane" id="ip3-4">
+      <div class="c">
+        <div class="c-title">🚨 15분봉 급락 알림</div>
+        <div style="font-size:11px;color:var(--dim);line-height:1.5;margin-bottom:10px">
+          15분봉 1개 내 급락 감지 시 즉시 알림<br>
+          <span style="color:var(--amber)">권장 기준: 3%</span> · BTC 역대 15분 급락: 3~8% (극단 15%)
+        </div>
+        <div class="crash-control" style="margin-bottom:10px">
+          <div class="crash-ctrl-top">
+            <span class="crash-ctrl-label">급락 기준</span>
+            <span class="crash-thresh-display"><span id="flashThreshVal">3.0%</span></span>
+          </div>
+          <input type="range" id="flashSlider" class="crash-slider" min="1" max="10" step="0.5" value="3">
+          <div class="crash-slider-ticks"><span>1%</span><span>3%</span><span>5%</span><span>7%</span><span>10%</span></div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
+          <span style="font-size:11px;color:var(--dim)">직접 입력:</span>
+          <input type="number" id="flashInput" class="crash-input" min="1" max="15" step="0.5" value="3" placeholder="%" style="width:58px">
+          <span style="font-size:11px;color:var(--dim)">%</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:8px">
+          <button class="ctrl-btn" id="flash-alert-btn" onclick="App.toggleFlashAlert()">▶️ 급락 감시 시작</button>
+          <span id="flash-alert-status" style="font-family:var(--mono);font-size:11px;color:var(--dim)">중지됨</span>
+        </div>
+      </div>
+      <div id="flash-alert-log" class="scroll" style="max-height:300px"></div>
+      <div id="flash-alert-empty" class="empty"><div class="ei">🚨</div>감시 시작 후 급락 발생 시 알림</div>
+    </div>
   </div>
 
   <!-- ═══ TAB 4: 펀딩비 ═══ -->
@@ -872,10 +856,11 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
   <!-- ═══ TAB 6: 백테스트 ═══ -->
   <div class="pane" id="p6">
     <div class="c">
-      <div class="c-title">🧪 S/R Zone 백테스트</div>
+      <div class="c-title">🧪 S/R Zone 백테스트 (v6)</div>
       <div style="font-size:12px;color:var(--dim);line-height:1.7;margin-bottom:10px">
-        L1 · L1 Ext · L2 존의 <b>터치/반전/돌파율</b>을 검증합니다.<br>
-        <span style="color:var(--amber)">60%↑</span> = 유의미 · <span style="color:var(--red)">40%↓</span> = 신뢰도 낮음
+        L1 · L2 존의 <b>터치/반전/돌파율</b>을 검증합니다.<br>
+        <span style="color:var(--amber)">60%↑</span> = 유의미 ·
+        <span style="color:var(--red)">40%↓</span> = 신뢰도 낮음
       </div>
       <div style="margin-bottom:12px">
         <div style="font-size:10px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">분석 기간</div>
@@ -929,8 +914,7 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
           <button class="btn-primary" onclick="Crash.run()" style="padding:7px 18px;font-size:12px">🔍 탐색</button>
         </div>
         <div style="font-size:10px;color:var(--dim);margin-top:8px;line-height:1.5">
-          ※ 4시간봉 1,500개 (~250일) · 거래량 스파이크 동반 여부 자동 분석<br>
-          <span style="color:var(--amber)">🔥 3×↑</span> = 강한 거래량 · <span style="color:var(--dim)">⚡ 2×↑</span> = 주의 거래량
+          ※ 4시간봉 1,500개 (~250일) · 거래량 스파이크 동반 여부 자동 분석
         </div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 2px 8px">
@@ -960,26 +944,29 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
 <script>
 /* ---- config.js ---- */
 // ============================================================
-// CONFIG.JS — 설정 / API 키 / 상수  (v5)
+// CONFIG.JS — 설정 / API 키 / 상수 (v6: DailyOpen + Dual SMA ATR)
 // ============================================================
 const Config = (() => {
-  const SYM          = 'BTCUSDT';
-  const ATR_P        = 10;        // ATR 기간 (Wilder 방식)
-  const HMA_PERIOD   = 200;       // 1st MA — 15m HMA 200 (entry line)
-  const HMA_TF       = '15m';
-  const HMA_LIMIT    = 500;
-  const HMA_2ND_TF   = '1h';     // 2nd MA timeframe (trendline)
-  const HMA_2ND_P    = 200;      // 2nd MA period
-  const HMA_2ND_LIM  = 300;      // 1h candles limit
-  const FI           = 0.382;    // L1 inner
-  const FO           = 0.500;    // L1 outer
-  const L1E_F1       = 0.618;    // L1 Ext inner
-  const L1E_F2       = 0.786;    // L1 Ext outer
-  const L2_F1        = 1.000;    // L2 inner
-  const L2_F2        = 1.272;    // L2 outer
-  const VOL_TH       = 2000;
+  const SYM         = 'BTCUSDT';
+  const ATR_P_INNER = 7;      // L1 inner SMA ATR period
+  const ATR_P_OUTER = 10;     // L1 outer SMA ATR period
+  const F           = 0.500;  // Fibonacci 0.5 multiplier
+  const F_L2        = 1.000;  // L2 = 2× extension (유료방 기준)
 
-  const LS_KEY = 'btc_api_key';
+  // ── HMA 설정 (Hull MA & Warning Zones 인디케이터 기준) ──
+  // 1st MA: 현재 차트 TF의 HMA 200 (entry line) → 노란색
+  // 2nd MA: 1h HMA 200 (trendline)              → 파란색
+  const HMA_PERIOD  = 200;    // 1st MA period
+  const HMA_TF      = '15m';  // 기본 차트 TF
+  const HMA_LIMIT   = 500;    // 1st MA candle limit
+  const HMA_2ND_TF  = '1h';   // 2nd MA timeframe (trendline)
+  const HMA_2ND_P   = 200;    // 2nd MA period
+  const HMA_2ND_LIM = 300;    // 2nd MA candle limit
+
+  const VOL_TH      = 2000;
+  const FLASH_DROP  = 3.0;    // 15분봉 급락 기본 기준 (%)
+
+  const LS_KEY      = 'btc_api_key';
   function getApiKey() { return localStorage.getItem(LS_KEY) || ''; }
   function setApiKey(key) {
     if (key) localStorage.setItem(LS_KEY, key.trim());
@@ -987,10 +974,10 @@ const Config = (() => {
   }
 
   return {
-    SYM, ATR_P, HMA_PERIOD, HMA_TF, HMA_LIMIT,
+    SYM, ATR_P_INNER, ATR_P_OUTER, F, F_L2,
+    HMA_PERIOD, HMA_TF, HMA_LIMIT,
     HMA_2ND_TF, HMA_2ND_P, HMA_2ND_LIM,
-    FI, FO, L1E_F1, L1E_F2, L2_F1, L2_F2,
-    VOL_TH, getApiKey, setApiKey
+    VOL_TH, FLASH_DROP, getApiKey, setApiKey
   };
 })();
 
@@ -1039,8 +1026,10 @@ const API = (() => {
   }
 
   // 캔들 (범용)
-  async function klines(sym, interval, limit) {
-    return call('klines', { symbol: sym, interval, limit });
+  async function klines(sym, interval, limit, endTime) {
+    const p = { symbol: sym, interval, limit };
+    if (endTime) p.endTime = endTime;
+    return call('klines', p);
   }
 
   return { call, parseDailyKlines, tickerPrice, klines };
@@ -1101,14 +1090,15 @@ const HMA = (() => {
 
 /* ---- sr.js ---- */
 // ============================================================
-// SR.JS — HMA 기반 지지/저항 (v5: Wilder ATR)
+// SR.JS — 지지/저항 계산 (v6: DailyOpen + Dual SMA ATR)
 //
-// L1      0.382 ~ 0.500   기본 구간
-// L1 Ext  0.618 ~ 0.786   1차 확장
-// L2      1.000 ~ 1.272   2차 확장
+// Center  = DailyOpen (00:00 UTC = 09:00 KST 일봉 시가)
+// L1      = ± F × {SMA_ATR(7), SMA_ATR(10)}   기본 구간
+// L2      = ± F_L2 × {SMA_ATR(7), SMA_ATR(10)} 2배 확장
 // ============================================================
 const SR = (() => {
 
+  // ── TR 계산 ──
   function calcTR(candles) {
     for (let i = 0; i < candles.length; i++) {
       const c = candles[i];
@@ -1118,110 +1108,139 @@ const SR = (() => {
     }
   }
 
-  // ── Wilder ATR (v5: SMA → Wilder) ──
-  function calcATRWilder(candles, p) {
-    if (candles.length < p) return null;
-    let atr = 0;
-    for (let i = 0; i < p; i++) atr += candles[i].tr;
-    atr /= p;
-    for (let i = p; i < candles.length; i++) {
-      atr = (atr * (p - 1) + candles[i].tr) / p;
-    }
-    return atr;
+  // ── SMA ATR ──
+  function calcATRSMA(candles, idx, period) {
+    if (idx < period - 1) return null;
+    let sum = 0;
+    for (let i = idx - period + 1; i <= idx; i++) sum += candles[i].tr;
+    return sum / period;
   }
 
-  // 과거용 SMA ATR (히스토리 계산 유지)
-  function calcATRSMA(candles, idx, p) {
-    if (idx < p - 1) return null;
-    let s = 0;
-    for (let i = idx - p + 1; i <= idx; i++) s += candles[i].tr;
-    return s / p;
-  }
+  // ── 레벨 생성 ──
+  function buildLevels(center, atrInner, atrOuter) {
+    const F    = Config.F;       // 0.500
+    const F_L2 = Config.F_L2;   // 1.000
 
-  function buildLevels(center, atr) {
-    const { FI, FO, L1E_F1, L1E_F2, L2_F1, L2_F2 } = Config;
+    // 항상 inner < outer 보장 (R2 > R1 정렬)
+    const ai = Math.min(atrInner, atrOuter);
+    const ao = Math.max(atrInner, atrOuter);
+
     return {
-      center, atr,
-      r1: center + FI     * atr, r2: center + FO     * atr,
-      s1: center - FI     * atr, s2: center - FO     * atr,
-      r3: center + L1E_F1 * atr, r4: center + L1E_F2 * atr,
-      s3: center - L1E_F1 * atr, s4: center - L1E_F2 * atr,
-      r5: center + L2_F1  * atr, r6: center + L2_F2  * atr,
-      s5: center - L2_F1  * atr, s6: center - L2_F2  * atr,
+      center, atrInner: ai, atrOuter: ao,
+      // L1: 기본
+      r1: center + F * ai,  r2: center + F * ao,
+      s1: center - F * ai,  s2: center - F * ao,
+      // L2: 2배 확장
+      r3: center + F_L2 * ai,  r4: center + F_L2 * ao,
+      s3: center - F_L2 * ai,  s4: center - F_L2 * ao,
     };
   }
 
+  // ── 일별 캐시 ──
+  let _srCache = null;
+
   async function compute() {
-    const { SYM, ATR_P, HMA_PERIOD, HMA_TF, HMA_LIMIT, FO, FI, L1E_F1, L1E_F2, L2_F1, L2_F2 } = Config;
+    const SYM       = Config.SYM;
+    const ATR_INNER = Config.ATR_P_INNER;   // 7
+    const ATR_OUTER = Config.ATR_P_OUTER;   // 10
 
-    // 1) Center = HMA 200 on 15m (실시간)
-    const raw15m = await API.klines(SYM, HMA_TF, HMA_LIMIT);
-    const candles15m = raw15m.map(k => ({
-      time: k[0]/1000, open: +k[1], high: +k[2], low: +k[3], close: +k[4]
-    }));
-    const hmaCenterValue = HMA.latestValue(candles15m, HMA_PERIOD);
+    // 오늘 날짜 기준 캐시 키
+    const now = new Date();
+    const todayUTC = now.toISOString().split('T')[0];
+    if (_srCache && _srCache.dateKey === todayUTC) {
+      return _srCache;
+    }
 
-    // 2) ATR = Wilder(10) on 일봉
-    const rawD  = await API.klines(SYM, '1d', 60);
+    // 1) 일봉 로드 (60개면 충분)
+    const rawD = await API.klines(SYM, '1d', 60);
     const daily = API.parseDailyKlines(rawD);
     calcTR(daily);
 
-    const todayUTC = new Date().toISOString().split('T')[0];
+    // 2) 오늘/어제 캔들 식별
     const lastDate = daily[daily.length-1].date.toISOString().split('T')[0];
-    const prevIdx  = lastDate === todayUTC ? daily.length-2 : daily.length-1;
-    const prev     = daily[prevIdx];
+    const todayIdx = lastDate === todayUTC ? daily.length - 1 : -1;
+    const prevIdx  = todayIdx >= 0 ? daily.length - 2 : daily.length - 1;
 
-    // Wilder ATR: prevIdx+1개 candle까지만 사용
-    const atrCandles = daily.slice(0, prevIdx + 1);
-    const atr = calcATRWilder(atrCandles, ATR_P);
-    if (!atr) throw new Error('ATR 계산 불가');
+    // 3) Center = 오늘 일봉 시가 (DailyOpen)
+    let center, openTime;
+    if (todayIdx >= 0) {
+      center = daily[todayIdx].open;
+      openTime = daily[todayIdx].date;
+    } else {
+      center = daily[daily.length-1].close;
+      openTime = daily[daily.length-1].date;
+    }
 
-    const levels = buildLevels(hmaCenterValue, atr);
+    // 4) ATR 계산 (어제까지의 데이터만 사용)
+    const atrI = calcATRSMA(daily, prevIdx, ATR_INNER);
+    const atrO = calcATRSMA(daily, prevIdx, ATR_OUTER);
+    if (!atrI || !atrO) throw new Error('ATR 계산 불가 (데이터 부족)');
 
-    // 히스토리 (일봉 종가 기반 — 과거 HMA 재계산 불가)
+    const prev = daily[prevIdx];
+    const levels = buildLevels(center, atrI, atrO);
+
+    // 5) 히스토리 (과거 일봉 기반)
     const hist = [];
-    for (let i = ATR_P; i <= prevIdx; i++) {
+    const maxPeriod = Math.max(ATR_INNER, ATR_OUTER);
+    for (let i = maxPeriod; i <= prevIdx; i++) {
       const c = daily[i];
-      const atrSlice = daily.slice(0, i + 1);
-      const a = calcATRWilder(atrSlice, ATR_P);
-      if (!a) continue;
-      const nd = new Date(c.openTime + 86400000);
-      const ctr = c.close;
+      const ai = calcATRSMA(daily, i, ATR_INNER);
+      const ao = calcATRSMA(daily, i, ATR_OUTER);
+      if (!ai || !ao) continue;
+
+      const nextDay = i + 1 < daily.length ? daily[i+1] : null;
+      const ctr = nextDay ? nextDay.open : c.close;
+      const nd = nextDay ? nextDay.date : new Date(c.openTime + 86400000);
+      const lv = buildLevels(ctr, ai, ao);
+
       hist.push({
-        date: nd, ds: `${nd.getUTCMonth()+1}월 ${nd.getUTCDate()}일`,
-        r2: Math.round(ctr + FO * a), r1: Math.round(ctr + FI * a),
-        s1: Math.round(ctr - FI * a), s2: Math.round(ctr - FO * a),
-        r4: Math.round(ctr + L1E_F2 * a), r3: Math.round(ctr + L1E_F1 * a),
-        s3: Math.round(ctr - L1E_F1 * a), s4: Math.round(ctr - L1E_F2 * a),
-        r6: Math.round(ctr + L2_F2 * a), r5: Math.round(ctr + L2_F1 * a),
-        s5: Math.round(ctr - L2_F1 * a), s6: Math.round(ctr - L2_F2 * a),
-        cl: Math.round(ctr), atr: Math.round(a), note: 'close'
+        date: nd,
+        ds: `${nd.getUTCMonth()+1}월 ${nd.getUTCDate()}일`,
+        r2: Math.round(lv.r2), r1: Math.round(lv.r1),
+        s1: Math.round(lv.s1), s2: Math.round(lv.s2),
+        r4: Math.round(lv.r4), r3: Math.round(lv.r3),
+        s3: Math.round(lv.s3), s4: Math.round(lv.s4),
+        cl: Math.round(ctr),
+        atrI: Math.round(ai), atrO: Math.round(ao),
+        note: nextDay ? 'open' : 'close'
       });
     }
     hist.reverse();
 
-    return {
-      levels,
-      prev: { open: prev.open, high: prev.high, low: prev.low, close: prev.close, atr, date: prev.date },
-      hist, candles15m
+    const result = {
+      levels, hist, openTime,
+      prev: { open: prev.open, high: prev.high, low: prev.low, close: prev.close,
+              atrInner: atrI, atrOuter: atrO, date: prev.date },
+      center,
     };
+    _srCache = { dateKey: todayUTC, ...result };
+    return result;
   }
 
+  // ── 과거 S/R 계산 (차트 탭 과거 조회용) ──
   async function computeHistorical(targetTime) {
-    const { SYM, ATR_P, HMA_PERIOD, HMA_TF, HMA_LIMIT } = Config;
-    const raw15m = await API.call('klines', { symbol: SYM, interval: HMA_TF, limit: HMA_LIMIT, endTime: targetTime });
-    const candles15m = raw15m.map(k => ({ time: k[0]/1000, open: +k[1], high: +k[2], low: +k[3], close: +k[4] }));
-    if (candles15m.length < HMA_PERIOD) throw new Error('15m 데이터 부족');
-    const center = HMA.latestValue(candles15m, HMA_PERIOD);
+    const SYM       = Config.SYM;
+    const ATR_INNER = Config.ATR_P_INNER;
+    const ATR_OUTER = Config.ATR_P_OUTER;
 
-    const rawD = await API.call('klines', { symbol: SYM, interval: '1d', limit: 60, endTime: targetTime });
+    const rawD = await API.klines(SYM, '1d', 60, targetTime);
     const daily = API.parseDailyKlines(rawD);
     calcTR(daily);
-    const idx = daily.length - 2;
-    if (idx < ATR_P - 1) throw new Error('일봉 데이터 부족');
-    const atr = calcATRWilder(daily.slice(0, idx + 1), ATR_P);
 
-    return { levels: buildLevels(center, atr), candles15m };
+    const lastIdx = daily.length - 1;
+    const prevIdx = lastIdx - 1;
+    if (prevIdx < Math.max(ATR_INNER, ATR_OUTER) - 1) throw new Error('일봉 데이터 부족');
+
+    const center = daily[lastIdx].open;
+    const atrI = calcATRSMA(daily, prevIdx, ATR_INNER);
+    const atrO = calcATRSMA(daily, prevIdx, ATR_OUTER);
+
+    const raw15m = await API.klines(SYM, '15m', 500, targetTime);
+    const candles15m = raw15m.map(k => ({
+      time: k[0]/1000, open: +k[1], high: +k[2], low: +k[3], close: +k[4]
+    }));
+
+    return { levels: buildLevels(center, atrI, atrO), candles15m };
   }
 
   function _calcTR(c) { calcTR(c); }
@@ -1233,28 +1252,30 @@ const SR = (() => {
 
 /* ---- chart-module.js ---- */
 // ============================================================
-// CHART-MODULE.JS — 차트 + 듀얼 HMA (v5.1)
-// 1st MA: 15m HMA 200 → 노란색 (#f59e0b)
-// 2nd MA: 1h  HMA 200 → 파란색 (#3b82f6)
+// CHART-MODULE.JS — 차트 + 듀얼 HMA + S/R 박스 (v6.1)
+// 1st MA: 15m HMA 200 → 노란색 (#f59e0b) — entry line
+// 2nd MA: 1h  HMA 200 → 파란색 (#3b82f6) — trendline
+// S/R: L1 (0.5×ATR) / L2 (1.0×ATR)
 // ============================================================
 const ChartModule = (() => {
   let chartObj, cSeries, hmLine, hmLineShort, volSeries;
   let rsiChart, rsiLine, rsiSmaLine;
-  let syncing   = false;
-  let curTF     = '1h';
+  let syncing = false;
+  let curTF     = '15m';  // 기본값 15분
   let srLevels  = null;
   let srDate    = null;
   let showL1    = false;
-  let showL1E   = false;
   let showL2    = false;
   let boxCanvas = null;
   let chartEl   = null;
+
   // HMA 최신값 (상단 레이블용)
   let hmaVal15m = null;
   let hmaVal1h  = null;
 
-  const HMA_15M_COLOR = '#f59e0b';  // 노란색 (amber)
-  const HMA_1H_COLOR  = '#3b82f6';  // 파란색 (blue)
+  // ★ 차트에 없는 색으로 HMA 표시 (캔들 빨강/초록과 겹치지 않음)
+  const HMA_15M_COLOR = '#f59e0b';  // 노란색 (amber) — 1st MA
+  const HMA_1H_COLOR  = '#3b82f6';  // 파란색 (blue)  — 2nd MA
 
   function init(containerId) {
     chartEl = document.getElementById(containerId);
@@ -1266,17 +1287,15 @@ const ChartModule = (() => {
       timeScale: { timeVisible: true, secondsVisible: false, borderColor: '#1c2233' },
       rightPriceScale: { borderColor: '#1c2233' },
     });
-
     cSeries = chartObj.addCandlestickSeries({
       upColor: '#2db87e', downColor: '#e74c5a',
       borderVisible: false, wickUpColor: '#2db87e', wickDownColor: '#e74c5a'
     });
 
-    // 1st MA: 15m HMA 200 — 노란색, 오른쪽 가격 박스 표시
+    // 1st MA: HMA 200 (현재 TF) — 노란색, 오른쪽 가격 박스 표시
     hmLine = chartObj.addLineSeries({
       color: HMA_15M_COLOR, lineWidth: 2,
       lastValueVisible: true, priceLineVisible: false,
-      // lastPriceAnimation: 0 은 기본 정적
     });
     // 2nd MA: 1h HMA 200 — 파란색, 오른쪽 가격 박스 표시
     hmLineShort = chartObj.addLineSeries({
@@ -1295,21 +1314,16 @@ const ChartModule = (() => {
     chartEl.style.position = 'relative';
     chartEl.appendChild(boxCanvas);
 
-    // 리사이즈
     const resize = () => {
       const w = chartEl.clientWidth, h = 420, dpr = window.devicePixelRatio || 1;
       chartObj.applyOptions({ width: w, height: h });
-      boxCanvas.width  = w * dpr; boxCanvas.height = h * dpr;
+      boxCanvas.width = w * dpr; boxCanvas.height = h * dpr;
       boxCanvas.style.width = w + 'px'; boxCanvas.style.height = h + 'px';
       drawBoxes();
     };
     new ResizeObserver(resize).observe(chartEl);
     setTimeout(resize, 100);
-
-    // ★ 렌더링 지연 개선: logicalRange 변경 시 즉시(동기) 재렌더
-    chartObj.timeScale().subscribeVisibleLogicalRangeChange(() => drawBoxes());
-    // timeRange 변경도 구독 (timeScale.fitContent 등 처리)
-    chartObj.timeScale().subscribeVisibleTimeRangeChange(() => drawBoxes());
+    chartObj.timeScale().subscribeVisibleTimeRangeChange(() => requestAnimationFrame(drawBoxes));
 
     // ── RSI 서브차트 ──
     const rsiEl = document.getElementById('rsi-chart');
@@ -1317,7 +1331,7 @@ const ChartModule = (() => {
       rsiChart = LightweightCharts.createChart(rsiEl, {
         width: rsiEl.clientWidth, height: 120,
         layout: { background: { color: '#0f1219' }, textColor: '#8893a6' },
-        grid:   { vertLines: { color: '#1c2233' }, horzLines: { color: '#1c2233' } },
+        grid: { vertLines: { color: '#1c2233' }, horzLines: { color: '#1c2233' } },
         crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
         timeScale: { timeVisible: true, secondsVisible: false, borderColor: '#1c2233', visible: false },
         rightPriceScale: { borderColor: '#1c2233', scaleMargins: { top: 0.05, bottom: 0.05 } },
@@ -1330,26 +1344,37 @@ const ChartModule = (() => {
       });
       const ob = rsiChart.addLineSeries({ color: 'rgba(231,76,90,.35)', lineWidth: 1, lineStyle: 2, lastValueVisible: false, priceLineVisible: false });
       const os = rsiChart.addLineSeries({ color: 'rgba(45,184,126,.35)', lineWidth: 1, lineStyle: 2, lastValueVisible: false, priceLineVisible: false });
-      rsiChart._obLine = ob; rsiChart._osLine = os;
+      rsiChart._obLine = ob;
+      rsiChart._osLine = os;
 
       chartObj.timeScale().subscribeVisibleLogicalRangeChange(range => {
         if (syncing || !range) return;
-        syncing = true; rsiChart.timeScale().setVisibleLogicalRange(range); syncing = false;
+        syncing = true;
+        rsiChart.timeScale().setVisibleLogicalRange(range);
+        syncing = false;
       });
       rsiChart.timeScale().subscribeVisibleLogicalRangeChange(range => {
         if (syncing || !range) return;
-        syncing = true; chartObj.timeScale().setVisibleLogicalRange(range); syncing = false;
+        syncing = true;
+        chartObj.timeScale().setVisibleLogicalRange(range);
+        syncing = false;
       });
-      const rsiResize = () => { rsiChart.applyOptions({ width: rsiEl.clientWidth, height: 120 }); };
+      const rsiResize = () => {
+        rsiChart.applyOptions({ width: rsiEl.clientWidth, height: 120 });
+      };
       new ResizeObserver(rsiResize).observe(rsiEl);
     }
   }
 
-  function setSRLevels(levels, dateOverride) { srLevels = levels; srDate = dateOverride || null; drawBoxes(); }
-  function setShowL1(v)  { showL1  = v; drawBoxes(); }
-  function setShowL1E(v) { showL1E = v; drawBoxes(); }
-  function setShowL2(v)  { showL2  = v; drawBoxes(); }
-  function getVisibility() { return { l1: showL1, l1e: showL1E, l2: showL2 }; }
+  function setSRLevels(levels, dateOverride) {
+    srLevels = levels;
+    srDate = dateOverride || null;
+    drawBoxes();
+  }
+
+  function setShowL1(v) { showL1 = v; drawBoxes(); }
+  function setShowL2(v) { showL2 = v; drawBoxes(); }
+  function getVisibility() { return { l1: showL1, l2: showL2 }; }
 
   function getDayRange() {
     const d = srDate ? new Date(srDate) : new Date();
@@ -1357,129 +1382,77 @@ const ChartModule = (() => {
     return { start, end: start + 86400 };
   }
 
-  // ── 박스 + HMA 상단 레이블 렌더링 ──
   function drawBoxes() {
     if (!boxCanvas || !chartObj || !cSeries) return;
     const ctx = boxCanvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
     ctx.clearRect(0, 0, boxCanvas.width, boxCanvas.height);
+    if ((!showL1 && !showL2) || !srLevels) return;
+
     ctx.save();
     ctx.scale(dpr, dpr);
 
+    const ts = chartObj.timeScale();
+    const { start, end } = getDayRange();
+    const xS = ts.timeToCoordinate(start);
+    const xE = ts.timeToCoordinate(end);
+    if (xS === null && xE === null) { ctx.restore(); return; }
+
     const canvasW = boxCanvas.width / dpr;
-    const canvasH = boxCanvas.height / dpr;
+    const bL = Math.max(xS !== null ? xS : 0, 0);
+    const bR = Math.min(xE !== null ? xE : canvasW, canvasW);
+    const bW = bR - bL;
+    if (bW <= 2) { ctx.restore(); return; }
 
-    // ── S/R 박스 ──
-    if ((showL1 || showL1E || showL2) && srLevels) {
-      const ts = chartObj.timeScale();
-      const { start, end } = getDayRange();
-      const xS = ts.timeToCoordinate(start);
-      const xE = ts.timeToCoordinate(end);
-
-      if (!(xS === null && xE === null)) {
-        const bL = Math.max(xS !== null ? xS : 0, 0);
-        const bR = Math.min(xE !== null ? xE : canvasW, canvasW);
-        const bW = bR - bL;
-
-        if (bW > 2) {
-          function drawZone(top, bot, fill, stroke, label) {
-            const yT = cSeries.priceToCoordinate(top);
-            const yB = cSeries.priceToCoordinate(bot);
-            if (yT === null || yB === null) return;
-            const y = Math.min(yT, yB), h = Math.abs(yB - yT);
-            if (h < 1) return;
-            ctx.fillStyle = fill;
-            ctx.fillRect(bL, y, bW, h);
-            ctx.strokeStyle = stroke; ctx.lineWidth = 1.5; ctx.setLineDash([]);
-            ctx.strokeRect(bL, y, bW, h);
-            // 존 내부 레이블
-            ctx.font = 'bold 10px "IBM Plex Mono", monospace';
-            ctx.fillStyle = stroke;
-            const txt = fmtN(top) + ' ~ ' + fmtN(bot);
-            const tw = ctx.measureText(txt).width;
-            if (bW > tw + 8) {
-              ctx.fillText(txt, bL + (bW - tw) / 2, y - 4);
-            }
-          }
-
-          if (showL1) {
-            drawZone(srLevels.r2, srLevels.r1, 'rgba(231,76,90,0.18)', 'rgba(231,76,90,0.75)');
-            drawZone(srLevels.s1, srLevels.s2, 'rgba(45,184,126,0.18)', 'rgba(45,184,126,0.75)');
-          }
-          if (showL1E) {
-            drawZone(srLevels.r4, srLevels.r3, 'rgba(231,76,90,0.08)', 'rgba(231,76,90,0.40)');
-            drawZone(srLevels.s3, srLevels.s4, 'rgba(45,184,126,0.08)', 'rgba(45,184,126,0.40)');
-          }
-          if (showL2) {
-            drawZone(srLevels.r6, srLevels.r5, 'rgba(255,152,0,0.12)', 'rgba(255,152,0,0.55)');
-            drawZone(srLevels.s5, srLevels.s6, 'rgba(0,188,212,0.12)', 'rgba(0,188,212,0.55)');
-          }
-
-          // Center 점선 (중앙에만, 가격표시는 상단 태그로 이동)
-          if (srLevels.center) {
-            const yC = cSeries.priceToCoordinate(srLevels.center);
-            if (yC !== null) {
-              ctx.setLineDash([5, 3]);
-              ctx.strokeStyle = 'rgba(239,180,32,0.4)'; ctx.lineWidth = 1;
-              ctx.beginPath(); ctx.moveTo(bL, yC); ctx.lineTo(bL + bW, yC); ctx.stroke();
-              ctx.setLineDash([]);
-            }
-          }
-        }
-      }
+    function drawZone(top, bot, fill, stroke) {
+      const yT = cSeries.priceToCoordinate(top);
+      const yB = cSeries.priceToCoordinate(bot);
+      if (yT === null || yB === null) return;
+      const y = Math.min(yT, yB), h = Math.abs(yB - yT);
+      if (h < 1) return;
+      ctx.fillStyle = fill;
+      ctx.fillRect(bL, y, bW, h);
+      ctx.strokeStyle = stroke; ctx.lineWidth = 1.5; ctx.setLineDash([]);
+      ctx.strokeRect(bL, y, bW, h);
+      ctx.font = 'bold 10px "IBM Plex Mono", monospace';
+      ctx.fillStyle = stroke;
+      const txt = fmtN(top) + ' ~ ' + fmtN(bot);
+      const tw = ctx.measureText(txt).width;
+      ctx.fillText(txt, bL + (bW - tw) / 2, y - 4);
     }
 
-    // ── 상단 HMA 태그 (차트 내부 왼쪽 상단) ──
-    if (hmaVal15m !== null || hmaVal1h !== null) {
-      const tags = [];
-      if (hmaVal15m !== null) tags.push({ label: `HMA 200 (15m)  ${fmtN(hmaVal15m)}`, color: HMA_15M_COLOR });
-      if (hmaVal1h  !== null) tags.push({ label: `HMA 200 (1h)   ${fmtN(hmaVal1h)}`,  color: HMA_1H_COLOR  });
+    // L1 (0.5×ATR)
+    if (showL1) {
+      drawZone(srLevels.r2, srLevels.r1,
+        'rgba(231,76,90,0.18)', 'rgba(231,76,90,0.75)');
+      drawZone(srLevels.s1, srLevels.s2,
+        'rgba(45,184,126,0.18)', 'rgba(45,184,126,0.75)');
+    }
 
-      ctx.font = 'bold 11px "IBM Plex Mono", monospace';
-      let xOff = 10;
-      const yTag = 10;
-      const padX = 8, padY = 4;
+    // L2 (1.0×ATR, 2× 확장)
+    if (showL2) {
+      drawZone(srLevels.r4, srLevels.r3,
+        'rgba(255,152,0,0.12)', 'rgba(255,152,0,0.55)');
+      drawZone(srLevels.s3, srLevels.s4,
+        'rgba(0,188,212,0.12)', 'rgba(0,188,212,0.55)');
+    }
 
-      for (const tag of tags) {
-        const tw   = ctx.measureText(tag.label).width;
-        const boxW = tw + padX * 2;
-        const boxH = 18;
-
-        // 배경 박스
-        ctx.fillStyle = tag.color + '28'; // 반투명 배경
-        ctx.strokeStyle = tag.color + 'aa';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([]);
-        roundRect(ctx, xOff, yTag, boxW, boxH, 3);
-        ctx.fill(); ctx.stroke();
-
-        // 텍스트
-        ctx.fillStyle = tag.color;
-        ctx.fillText(tag.label, xOff + padX, yTag + boxH - padY - 1);
-
-        xOff += boxW + 8;
-      }
+    // Center 점선 (DailyOpen)
+    const yC = cSeries.priceToCoordinate(srLevels.center);
+    if (yC !== null) {
+      ctx.setLineDash([6, 3]);
+      ctx.strokeStyle = 'rgba(239,180,32,0.75)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(bL, yC); ctx.lineTo(bL + bW, yC); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font = 'bold 10px "IBM Plex Mono", monospace';
+      ctx.fillStyle = 'rgba(239,180,32,0.9)';
+      ctx.fillText('Open ' + fmtN(srLevels.center), bL + 4, yC - 5);
     }
 
     ctx.restore();
   }
 
-  // ── 둥근 사각형 헬퍼 ──
-  function roundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-  }
-
-  function fmtN(n) { return n ? Math.round(n).toLocaleString('en-US') : '-'; }
+  function fmtN(n) { return n.toLocaleString('en-US', { maximumFractionDigits: 0 }); }
 
   // ── RSI 계산 ──
   function calcRSI(candles, period = 14) {
@@ -1531,7 +1504,7 @@ const ChartModule = (() => {
     }
   }
 
-  // ── 1h HMA200 로드 ──
+  // ── 1h HMA 200 별도 로드 (2nd MA: trendline) ──
   async function load1hHMA() {
     const { SYM, HMA_2ND_TF, HMA_2ND_P, HMA_2ND_LIM } = Config;
     try {
@@ -1561,16 +1534,16 @@ const ChartModule = (() => {
 
     const raw = await API.klines(Config.SYM, curTF, 500);
     const candles = raw.map(k => ({ time: k[0]/1000, open: +k[1], high: +k[2], low: +k[3], close: +k[4] }));
-    const vols    = raw.map(k => ({ time: k[0]/1000, value: +k[5], color: +k[4] >= +k[1] ? 'rgba(45,184,126,.25)' : 'rgba(231,76,90,.25)' }));
+    const vols = raw.map(k => ({ time: k[0]/1000, value: +k[5], color: +k[4] >= +k[1] ? 'rgba(45,184,126,.25)' : 'rgba(231,76,90,.25)' }));
     cSeries.setData(candles);
     volSeries.setData(vols);
 
     // 1st MA: 현재 TF HMA 200 (노란색)
-    const hma15mData = HMA.fromCandles(candles, 200);
+    const hma15mData = HMA.fromCandles(candles, Config.HMA_PERIOD);
     try { hmLine.setData(hma15mData); } catch { hmLine.setData([]); }
     hmaVal15m = hma15mData.length ? hma15mData[hma15mData.length - 1].value : null;
 
-    // 2nd MA: 1h HMA 200 (파란색)
+    // 2nd MA: 1h HMA 200 (파란색) — 별도 API 호출
     const hma1hData = await load1hHMA();
     let mapped1h = [];
     try {
@@ -1584,15 +1557,7 @@ const ChartModule = (() => {
     drawBoxes();
 
     // 레전드 업데이트
-    const legEl = document.getElementById('chart-hma-legend');
-    if (legEl) {
-      legEl.innerHTML =
-        `<div class="leg"><div class="leg-dot" style="background:${HMA_15M_COLOR}"></div>HMA 200 (${curTF})</div>` +
-        `<div class="leg"><div class="leg-dot" style="background:${HMA_1H_COLOR}"></div>HMA 200 (1h)</div>` +
-        `<div class="leg"><div class="leg-dot" style="background:var(--red)"></div>L1</div>` +
-        `<div class="leg"><div class="leg-dot" style="background:rgba(231,76,90,.4)"></div>L1Ext</div>` +
-        `<div class="leg"><div class="leg-dot" style="background:#ff9800"></div>L2</div>`;
-    }
+    updateLegend();
   }
 
   async function loadHistorical(candles15m) {
@@ -1602,10 +1567,12 @@ const ChartModule = (() => {
     cSeries.setData(candles15m.map(c => ({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close })));
     volSeries.setData([]);
 
-    const hma15mData = HMA.fromCandles(candles15m, 200);
+    // 1st MA (노란색)
+    const hma15mData = HMA.fromCandles(candles15m, Config.HMA_PERIOD);
     try { hmLine.setData(hma15mData); } catch { hmLine.setData([]); }
     hmaVal15m = hma15mData.length ? hma15mData[hma15mData.length - 1].value : null;
 
+    // 2nd MA: 1h HMA 200 (파란색)
     const hma1hData = await load1hHMA();
     try { hmLineShort.setData(mapHMAToTF(hma1hData, candles15m)); } catch { hmLineShort.setData([]); }
     hmaVal1h = hma1hData.length ? hma1hData[hma1hData.length - 1].value : null;
@@ -1613,15 +1580,32 @@ const ChartModule = (() => {
     setRSIData(candles15m);
     chartObj.timeScale().fitContent();
     drawBoxes();
+    updateLegend();
   }
 
-  return { init, setSRLevels, setShowL1, setShowL1E, setShowL2, getVisibility, load, loadHistorical };
+  function updateLegend() {
+    const legEl = document.getElementById('chart-hma-legend');
+    if (!legEl) return;
+    legEl.innerHTML =
+      `<div class="leg"><div class="leg-dot" style="background:${HMA_15M_COLOR}"></div>HMA 200 (${curTF})</div>` +
+      `<div class="leg"><div class="leg-dot" style="background:${HMA_1H_COLOR}"></div>HMA 200 (1h)</div>` +
+      `<div class="leg"><div class="leg-dot" style="background:var(--red)"></div>L1</div>` +
+      `<div class="leg"><div class="leg-dot" style="background:#ff9800"></div>L2</div>`;
+  }
+
+  function getHMAValues() { return { hma15m: hmaVal15m, hma1h: hmaVal1h }; }
+
+  return {
+    init, setSRLevels, setShowL1, setShowL2, getVisibility,
+    load, loadHistorical, getHMAValues,
+    HMA_15M_COLOR, HMA_1H_COLOR
+  };
 })();
 
 
 /* ---- history.js ---- */
 // ============================================================
-// HISTORY.JS — 히스토리 탭 (L1 + L1 Ext + L2 표시)
+// HISTORY.JS — 히스토리 탭 (v6: L1 + L2 표시)
 // ============================================================
 const History = (() => {
   let hist    = [];
@@ -1656,31 +1640,26 @@ const History = (() => {
     empty.style.display = 'none';
 
     list.innerHTML = items.map(h => {
-      // L1 Ext / L2 가 있으면 표시 (과거 데이터에 포함됨)
-      const hasExt = h.r3 !== undefined;
-      const hasL2  = h.r5 !== undefined;
+      const hasL2 = h.r3 !== undefined;
 
-      let extHtml = '';
-      if (hasExt) {
-        extHtml += `<div class="hl"><span class="ht r ext">저항 Ext</span><span class="hv">${fmt(h.r4)} ~ ${fmt(h.r3)}</span></div>`;
-        extHtml += `<div class="hl"><span class="ht s ext">지지 Ext</span><span class="hv">${fmt(h.s3)} ~ ${fmt(h.s4)}</span></div>`;
-      }
       let l2Html = '';
       if (hasL2) {
-        l2Html += `<div class="hl"><span class="ht r l2">저항 L2</span><span class="hv">${fmt(h.r6)} ~ ${fmt(h.r5)}</span></div>`;
-        l2Html += `<div class="hl"><span class="ht s l2">지지 L2</span><span class="hv">${fmt(h.s5)} ~ ${fmt(h.s6)}</span></div>`;
+        l2Html += `<div class="hl"><span class="ht r l2">저항 L2</span><span class="hv">${fmt(h.r4)} ~ ${fmt(h.r3)}</span></div>`;
+        l2Html += `<div class="hl"><span class="ht s l2">지지 L2</span><span class="hv">${fmt(h.s3)} ~ ${fmt(h.s4)}</span></div>`;
       }
+
+      const atrStr = h.atrO
+        ? `ATR(7) ${fmt(h.atrI)} / ATR(10) ${fmt(h.atrO)}`
+        : `ATR ${fmt(h.atr || h.atrI || 0)}`;
+      const noteStr = h.note === 'close' ? '<i style="color:var(--dim);font-size:9px"> ※종가기준</i>' : '';
 
       return `
       <div class="hi">
         <div class="hi-d">${h.ds}
-          <span>(종가 ${fmt(h.cl)} / ATR ${fmt(h.atr)}
-            ${h.note === 'close' ? '<i style="color:var(--dim);font-size:9px"> ※종가기준</i>' : ''})
-          </span>
+          <span>(Center ${fmt(h.cl)} / ${atrStr}${noteStr})</span>
         </div>
         <div class="hl"><span class="ht r">저항 L1</span><span class="hv">${fmt(h.r2)} ~ ${fmt(h.r1)}</span></div>
         <div class="hl"><span class="ht s">지지 L1</span><span class="hv">${fmt(h.s1)} ~ ${fmt(h.s2)}</span></div>
-        ${extHtml}
         ${l2Html}
       </div>`;
     }).join('');
@@ -2393,16 +2372,16 @@ const Heatmap = (() => {
 
 /* ---- signal.js ---- */
 // ============================================================
-// SIGNAL.JS — HMA 크로스 매매 신호 (v5)
+// SIGNAL.JS — HMA 크로스 매매 신호 (v6)
 //
-// 1st MA: 15m HMA 200 (entry line, 빨강)
-// 2nd MA: 1h  HMA 200 (trendline, 초록)
+// 1st MA: 15m HMA 200 (entry line, 노란색)
+// 2nd MA: 1h  HMA 200 (trendline, 파란색)
 //
 // 크로스 감지 → [골든크로스/데드크로스] 알림
 // 조건 충족 시 → [Long/Short Entry] 신호 생성
 //
 // Entry 조건:
-//   골든크로스 + RSI(14) 40~68 + (ATR 정상 범위)
+//   골든크로스 + RSI(14) 40~68
 //   데드크로스 + RSI(14) 32~60
 // ============================================================
 const Signal = (() => {
@@ -2410,13 +2389,12 @@ const Signal = (() => {
   const LS_KEY   = 'btc_signals';
   const TP_MULT  = [0.5, 1.667, 2.5, 3.333, 5.0];
   const ATR_PERIOD = 14;
-  const RSI_OB   = 68;   // Long 진입 RSI 상한
-  const RSI_OS   = 32;   // Short 진입 RSI 하한
+  const RSI_OB   = 68;
+  const RSI_OS   = 32;
 
   let signals    = [];
   let monitorOn  = false;
   let monitorIv  = null;
-  // 마지막 크로스 알림 (중복 방지)
   let lastCrossTime = 0;
   let lastCrossType = '';
 
@@ -2443,7 +2421,7 @@ const Signal = (() => {
     return rsi;
   }
 
-  // ── ATR(14) on 15m candles (SMA) ──
+  // ── ATR(14) on 15m candles ──
   function calcATR15m(candles, period = ATR_PERIOD) {
     const tr = candles.map((c, i) => {
       if (i === 0) return c.high - c.low;
@@ -2499,14 +2477,8 @@ const Signal = (() => {
     const rsiArr = calcRSI(closes, 14);
     const rsi = rsiArr[rsiArr.length - 1];
     if (rsi == null) return false;
-
-    if (cross.type === 'golden') {
-      // Long entry: RSI 40~RSI_OB (과열 아닌 상태)
-      return rsi >= 40 && rsi <= RSI_OB;
-    } else {
-      // Short entry: RSI_OS~60 (과매도 아닌 상태)
-      return rsi >= RSI_OS && rsi <= 60;
-    }
+    if (cross.type === 'golden') return rsi >= 40 && rsi <= RSI_OB;
+    else return rsi >= RSI_OS && rsi <= 60;
   }
 
   // ── 신호 생성 ──
@@ -2526,7 +2498,7 @@ const Signal = (() => {
       time:      cross.time,
       type:      isLong ? 'long' : 'short',
       crossType: cross.type,
-      signalKind,            // 'cross' | 'entry'
+      signalKind,
       entry, sl, slDist,
       tp: tps,
       hma15m:  Math.round(cross.hma15m),
@@ -2578,12 +2550,9 @@ const Signal = (() => {
       if (!crosses.length) { await updateStatuses(); return; }
 
       const latest = crosses[crosses.length - 1];
-
-      // 중복 방지 (같은 크로스 시간)
       const alreadyExists = signals.some(s => s.time === latest.time);
       if (alreadyExists) { await updateStatuses(); return; }
 
-      // 1) 크로스 알림 (크로스 감지 시 항상)
       if (latest.time !== lastCrossTime || latest.type !== lastCrossType) {
         lastCrossTime = latest.time;
         lastCrossType = latest.type;
@@ -2591,11 +2560,9 @@ const Signal = (() => {
         const crossSub   = latest.type === 'golden' ? '15m HMA200 > 1h HMA200 돌파' : '15m HMA200 < 1h HMA200 하향';
         App.toast(crossLabel, crossSub);
 
-        // 크로스 신호 저장
         const crossSig = generateSignal(latest, candles15m, 'cross');
         signals.unshift(crossSig);
 
-        // 2) Entry 조건 체크
         const entryOk = checkEntryCondition(latest, candles15m);
         if (entryOk) {
           const entrySig = generateSignal(latest, candles15m, 'entry');
@@ -2640,16 +2607,13 @@ const Signal = (() => {
 
       const existingTimes = new Set(signals.map(s => s.time));
       let added = 0;
-      // 최근 5개 크로스 처리
       for (let i = crosses.length - 1; i >= Math.max(0, crosses.length - 5); i--) {
         const c = crosses[i];
         if (existingTimes.has(c.time)) continue;
-        // 크로스 신호
         const crossSig = generateSignal(c, candles15m, 'cross');
         signals.unshift(crossSig);
         existingTimes.add(c.time);
         added++;
-        // Entry 조건 체크 (가장 최근 크로스만)
         if (i === crosses.length - 1 && checkEntryCondition(c, candles15m)) {
           const entrySig = generateSignal(c, candles15m, 'entry');
           entrySig.id = Date.now() + 1 + i;
@@ -2691,7 +2655,6 @@ const Signal = (() => {
       el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--dim)">신호 없음 — 스캔 또는 모니터링을 시작하세요</div>';
       return;
     }
-
     el.innerHTML = signals.slice(0, 20).map((sig) => {
       const isLong   = sig.type === 'long';
       const dirColor = isLong ? 'var(--green)' : 'var(--red)';
@@ -3219,8 +3182,8 @@ const ShortSignal = (() => {
 
 /* ---- backtest.js ---- */
 // ============================================================
-// BACKTEST.JS — S/R Zone 백테스트 (L1 + L1 Ext + L2)
-// 기간 선택: 2주 / 1개월 (15분봉 페이지네이션)
+// BACKTEST.JS — S/R Zone 백테스트 (v6: DailyOpen + Dual SMA ATR)
+// L1 (0.5×ATR) + L2 (1.0×ATR), L1Ext 제거
 // ============================================================
 const Backtest = (() => {
 
@@ -3228,7 +3191,7 @@ const Backtest = (() => {
   const $ = id => document.getElementById(id);
   const fmt = n => typeof n === 'number' ? n.toFixed(1) : n;
 
-  let period = '1m'; // '2w' or '1m'
+  let period = '1m';
 
   function setPeriod(p, btn) {
     period = p;
@@ -3236,7 +3199,7 @@ const Backtest = (() => {
     if (btn) btn.classList.add('on');
   }
 
-  // 15분봉 페이지네이션 (1500개 단위, endTime 기반)
+  // 15분봉 페이지네이션
   async function fetch15m(totalCandles) {
     const batchSize = 1500;
     let all = [];
@@ -3255,21 +3218,16 @@ const Backtest = (() => {
         time: k[0] / 1000, open: +k[1], high: +k[2], low: +k[3], close: +k[4]
       }));
 
-      // endTime 이전 데이터 가져오기 위해 첫 봉의 시작시간 - 1 사용
       endTime = raw[0][0] - 1;
-
-      // 역순으로 쌓임 → 앞에 붙이기
       all = batch.concat(all);
 
       const statusEl = $('bt-status');
       if (statusEl) statusEl.textContent = `15분봉 로딩 중… ${all.length.toLocaleString()}개`;
 
-      // 과도한 호출 방지 딜레이
       if (all.length < totalCandles && raw.length === limit) {
         await new Promise(r => setTimeout(r, 300));
       } else break;
     }
-
     return all;
   }
 
@@ -3281,11 +3239,7 @@ const Backtest = (() => {
     if (resultEl) resultEl.innerHTML = '';
 
     try {
-      // 기간에 따른 캔들 수 계산 (15분봉)
-      // 2주 = 14일 × 24h × 4 = 1,344 → 1,500 1회
-      // 1개월 = 30일 × 24h × 4 = 2,880 → 1,500 × 2회
       const candleCount = period === '2w' ? 1500 : 2900;
-
       const k15m = await fetch15m(candleCount);
 
       if (statusEl) statusEl.textContent = '일봉 로딩…';
@@ -3293,23 +3247,26 @@ const Backtest = (() => {
       const daily = API.parseDailyKlines(rawD);
       SR._calcTR(daily);
 
-      if (k15m.length < Config.HMA_PERIOD + 50) throw new Error(`15m 데이터 부족 (${k15m.length}개)`);
-
+      if (k15m.length < 200) throw new Error(`15m 데이터 부족 (${k15m.length}개)`);
       if (statusEl) statusEl.textContent = `연산 중… (${k15m.length.toLocaleString()}개 캔들)`;
 
-      const hmaAll = HMA.fromCandles(k15m, Config.HMA_PERIOD);
-      const hmaOffset = k15m.length - hmaAll.length;
-      const atrArr = [];
-      for (let i = 0; i < daily.length; i++) atrArr.push(SR._calcATR(daily, i, Config.ATR_P));
+      // 각 일봉에 대해 ATR(7), ATR(10) 미리 계산
+      const atrInnerArr = [];
+      const atrOuterArr = [];
+      for (let i = 0; i < daily.length; i++) {
+        atrInnerArr.push(SR._calcATR(daily, i, Config.ATR_P_INNER));
+        atrOuterArr.push(SR._calcATR(daily, i, Config.ATR_P_OUTER));
+      }
 
-      const { FI, FO, L1E_F1, L1E_F2, L2_F1, L2_F2 } = Config;
+      const F    = Config.F;      // 0.5
+      const F_L2 = Config.F_L2;   // 1.0
+
+      // v6 zone: center=DailyOpen, L1=±F×ATR, L2=±F_L2×ATR
       const zoneConfigs = [
-        { name: 'resL1',    factor: [FI, FO],         dir:  1, label: '저항 L1 (0.382~0.500)' },
-        { name: 'supL1',    factor: [FI, FO],         dir: -1, label: '지지 L1 (0.382~0.500)' },
-        { name: 'resL1ext', factor: [L1E_F1, L1E_F2], dir:  1, label: '저항 L1 Ext (0.618~0.786)' },
-        { name: 'supL1ext', factor: [L1E_F1, L1E_F2], dir: -1, label: '지지 L1 Ext (0.618~0.786)' },
-        { name: 'resL2',    factor: [L2_F1, L2_F2],   dir:  1, label: '저항 L2 (1.000~1.272)' },
-        { name: 'supL2',    factor: [L2_F1, L2_F2],   dir: -1, label: '지지 L2 (1.000~1.272)' },
+        { name: 'resL1', fMul: F,    dir:  1, label: '저항 L1 (0.5×ATR)' },
+        { name: 'supL1', fMul: F,    dir: -1, label: '지지 L1 (0.5×ATR)' },
+        { name: 'resL2', fMul: F_L2, dir:  1, label: '저항 L2 (1.0×ATR)' },
+        { name: 'supL2', fMul: F_L2, dir: -1, label: '지지 L2 (1.0×ATR)' },
       ];
 
       const stats = {};
@@ -3319,20 +3276,29 @@ const Backtest = (() => {
 
       const LOOK_FWD = 8, EVAL_GAP = 16;
 
-      for (let i = hmaOffset + 10; i < k15m.length - LOOK_FWD; i += EVAL_GAP) {
-        const hIdx = i - hmaOffset;
-        if (hIdx < 0 || hIdx >= hmaAll.length) continue;
-        const center = hmaAll[hIdx].value;
+      for (let i = 10; i < k15m.length - LOOK_FWD; i += EVAL_GAP) {
         const candleTime = k15m[i].time;
+
+        // 해당 시점의 일봉 찾기
         const dayIdx = daily.findIndex(d => d.openTime / 1000 > candleTime) - 1;
-        if (dayIdx < 0 || !atrArr[dayIdx]) continue;
-        const atr = atrArr[dayIdx];
+        if (dayIdx < 1) continue;
+
+        const atrI = atrInnerArr[dayIdx - 1]; // 전일 ATR
+        const atrO = atrOuterArr[dayIdx - 1];
+        if (!atrI || !atrO) continue;
+
+        // Center = 해당일 일봉 시가 (DailyOpen)
+        const center = daily[dayIdx].open;
+        const ai = Math.min(atrI, atrO);
+        const ao = Math.max(atrI, atrO);
 
         zoneConfigs.forEach(zc => {
           const stat = stats[zc.name];
-          const zTop = center + zc.factor[1] * atr * zc.dir;
-          const zBot = center + zc.factor[0] * atr * zc.dir;
-          const top = Math.max(zTop, zBot), bot = Math.min(zTop, zBot);
+          // zone = inner edge ~ outer edge
+          const zInner = center + zc.fMul * ai * zc.dir;
+          const zOuter = center + zc.fMul * ao * zc.dir;
+          const top = Math.max(zInner, zOuter);
+          const bot = Math.min(zInner, zOuter);
 
           let touchIdx = -1;
           for (let j = i; j < Math.min(i + LOOK_FWD, k15m.length); j++) {
@@ -3373,9 +3339,8 @@ const Backtest = (() => {
     html += `<table class="bt-table"><thead><tr><th></th><th>Zone</th><th>터치</th><th>반전</th><th>돌파</th><th>반전율</th><th>Avg반전</th></tr></thead><tbody>`;
 
     const groups = [
-      { label: 'Level 1 (0.382 ~ 0.500)',     keys: ['resL1','supL1'] },
-      { label: 'Level 1 Ext (0.618 ~ 0.786)',  keys: ['resL1ext','supL1ext'] },
-      { label: 'Level 2 (1.000 ~ 1.272)',      keys: ['resL2','supL2'] },
+      { label: 'Level 1 (0.5 × ATR)',  keys: ['resL1','supL1'] },
+      { label: 'Level 2 (1.0 × ATR)',  keys: ['resL2','supL2'] },
     ];
 
     groups.forEach(g => {
@@ -3402,8 +3367,10 @@ const Backtest = (() => {
 
 /* ---- app.js ---- */
 // ============================================================
-// APP.JS — 메인 진입점 (v5)
-// 탭 구조: 오늘/차트/히스토리/봇알림/펀딩비/숏시그널/백테스트/마켓뷰
+// APP.JS — 메인 진입점 (v6.1: 8탭 구조)
+// 탭: 오늘/차트/히스토리/봇알림/펀딩비/숏시그널/백테스트/마켓뷰
+// 봇알림 서브탭: HMA신호/거래량/S/R구간알림/가격알림/15분급락
+// 마켓뷰 서브탭: 급락탐지/월별히트맵
 // ============================================================
 const App = (() => {
 
@@ -3443,62 +3410,67 @@ const App = (() => {
     try {
       const data = await SR.compute();
       const { levels, prev, hist } = data;
+
       $('R2').textContent = fmt(levels.r2);  $('R1').textContent = fmt(levels.r1);
       $('S1').textContent = fmt(levels.s1);  $('S2').textContent = fmt(levels.s2);
       $('R4').textContent = fmt(levels.r4);  $('R3').textContent = fmt(levels.r3);
       $('S3').textContent = fmt(levels.s3);  $('S4').textContent = fmt(levels.s4);
-      $('R6').textContent = fmt(levels.r6);  $('R5').textContent = fmt(levels.r5);
-      $('S5').textContent = fmt(levels.s5);  $('S6').textContent = fmt(levels.s6);
+
       $('mCenter').textContent = '$' + fmt(levels.center);
       $('mO').textContent = fmt(prev.open);  $('mH').textContent = fmt(prev.high);
       $('mL').textContent = fmt(prev.low);   $('mC').textContent = fmt(prev.close);
-      $('mA').textContent = fmt(prev.atr);
+      $('mAI').textContent = fmt(prev.atrInner);
+      $('mAO').textContent = fmt(prev.atrOuter);
       $('mD').textContent = `${prev.date.getUTCMonth()+1}/${prev.date.getUTCDate()}`;
+
+      if (data.openTime) {
+        const kst = new Date(data.openTime.getTime() + 9 * 3600000);
+        $('mSnap').textContent =
+          `${kst.getUTCMonth()+1}/${kst.getUTCDate()} 09:00 KST (일봉 시가)`;
+      }
+
       $('loadToday').style.display = 'none';
       $('today').style.display     = 'block';
       ChartModule.setSRLevels(levels);
       History.setData(hist);
       History.render();
-      // S/R 알림용 전역 레벨 저장
       srLevels = levels;
       renderSRAlertZones();
     } catch(e) {
       $('loadToday').style.display = 'none';
       $('errToday').style.display  = 'block';
       $('errToday').textContent    = '⚠️ ' + e.message;
-      $('histLoad').style.display  = 'none';
+      if ($('histLoad')) $('histLoad').style.display = 'none';
     }
   }
 
-  // ── 탭 라우팅 ──
+  // ── 탭 라우팅 (8탭 구조) ──
+  // 0:오늘 1:차트 2:히스토리 3:봇알림 4:펀딩비 5:숏시그널 6:백테스트 7:마켓뷰
   let curTab = 0;
   let fundLoaded = false, hmLoaded = false, ssLoaded = false, sigLoaded = false;
 
   function go(i) {
     curTab = i;
     document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('on', j === i));
-    document.querySelectorAll('.pane').forEach((p, j) => p.classList.toggle('on', j === i));
+    document.querySelectorAll('.wrap > .pane').forEach((p, j) => p.classList.toggle('on', j === i));
 
     if (i === 1) ChartModule.load();
     if (i === 3 && !sigLoaded) { sigLoaded = true; Signal.init(); }
     if (i === 4 && !fundLoaded) { fundLoaded = true; Funding.init(); }
     if (i === 5 && !ssLoaded)  { ssLoaded = true; ShortSignal.load(); }
-    if (i === 7 && !hmLoaded)  { hmLoaded = true; Heatmap.load(); }
+    if (i === 7 && !hmLoaded)  { hmLoaded = true; Heatmap.load(); Crash.init(); }
   }
 
-  // ── 내부 서브탭 ──
   function innerGo(tabIdx, subIdx, btn) {
-    const tabId = `p${tabIdx}`;
-    const pane  = $(tabId);
+    const pane = $(`p${tabIdx}`);
     if (!pane) return;
     pane.querySelectorAll('.inner-tab').forEach((b, j) => b.classList.toggle('on', j === subIdx));
     pane.querySelectorAll('.inner-pane').forEach((p, j) => p.classList.toggle('on', j === subIdx));
   }
 
   // ── S/R 박스 토글 ──
-  function toggleL1()  { const v = ChartModule.getVisibility(); ChartModule.setShowL1(!v.l1);   $('btnL1').classList.toggle('on', !v.l1); }
-  function toggleL1E() { const v = ChartModule.getVisibility(); ChartModule.setShowL1E(!v.l1e); $('btnL1E').classList.toggle('on', !v.l1e); }
-  function toggleL2()  { const v = ChartModule.getVisibility(); ChartModule.setShowL2(!v.l2);   $('btnL2').classList.toggle('on', !v.l2); }
+  function toggleL1() { const v = ChartModule.getVisibility(); ChartModule.setShowL1(!v.l1); $('btnL1').classList.toggle('on', !v.l1); }
+  function toggleL2() { const v = ChartModule.getVisibility(); ChartModule.setShowL2(!v.l2); $('btnL2').classList.toggle('on', !v.l2); }
 
   async function loadHistSR() {
     const dateVal = $('srDateInput').value;
@@ -3515,8 +3487,6 @@ const App = (() => {
       $('S1').textContent = fmt(result.levels.s1); $('S2').textContent = fmt(result.levels.s2);
       $('R4').textContent = fmt(result.levels.r4); $('R3').textContent = fmt(result.levels.r3);
       $('S3').textContent = fmt(result.levels.s3); $('S4').textContent = fmt(result.levels.s4);
-      $('R6').textContent = fmt(result.levels.r6); $('R5').textContent = fmt(result.levels.r5);
-      $('S5').textContent = fmt(result.levels.s5); $('S6').textContent = fmt(result.levels.s6);
       $('mCenter').textContent = '$' + fmt(result.levels.center);
       status.textContent = dateVal + ' 기준 S/R 로드 완료';
       go(1);
@@ -3556,9 +3526,8 @@ const App = (() => {
   let srAlertOn   = false;
   let srAlertIv   = null;
   const srAlertLog   = [];
-  // 존별 마지막 알림 시간 (쿨다운 60분)
   const srCooldown   = {};
-  const SR_COOLDOWN  = 60 * 60 * 1000; // 60분
+  const SR_COOLDOWN  = 60 * 60 * 1000;
 
   function toggleSRAlert() {
     srAlertOn = !srAlertOn;
@@ -3573,16 +3542,12 @@ const App = (() => {
   function checkSRAlerts(price) {
     if (!srAlertOn || !srLevels) return;
     const now = Date.now();
-
     const zones = [
-      { id: 'R2', label: '저항 L1 상단',   hi: srLevels.r2 * 1.001, lo: srLevels.r1 * 0.999, color: '#e74c5a' },
-      { id: 'R4', label: '저항 L1Ext 상단', hi: srLevels.r4 * 1.001, lo: srLevels.r3 * 0.999, color: '#e87a44' },
-      { id: 'R6', label: '저항 L2 상단',    hi: srLevels.r6 * 1.001, lo: srLevels.r5 * 0.999, color: '#f97316' },
-      { id: 'S1', label: '지지 L1 상단',    hi: srLevels.s1 * 1.001, lo: srLevels.s2 * 0.999, color: '#2db87e' },
-      { id: 'S3', label: '지지 L1Ext 상단', hi: srLevels.s3 * 1.001, lo: srLevels.s4 * 0.999, color: '#22c55e' },
-      { id: 'S5', label: '지지 L2 상단',    hi: srLevels.s5 * 1.001, lo: srLevels.s6 * 0.999, color: '#06b6d4' },
+      { id: 'R_L1', label: '저항 L1',  hi: srLevels.r2 * 1.001, lo: srLevels.r1 * 0.999, color: '#e74c5a' },
+      { id: 'R_L2', label: '저항 L2',  hi: srLevels.r4 * 1.001, lo: srLevels.r3 * 0.999, color: '#ff9800' },
+      { id: 'S_L1', label: '지지 L1',  hi: srLevels.s1 * 1.001, lo: srLevels.s2 * 0.999, color: '#2db87e' },
+      { id: 'S_L2', label: '지지 L2',  hi: srLevels.s3 * 1.001, lo: srLevels.s4 * 0.999, color: '#00bcd4' },
     ];
-
     for (const z of zones) {
       if (price >= z.lo && price <= z.hi) {
         const lastAlert = srCooldown[z.id] || 0;
@@ -3625,30 +3590,101 @@ const App = (() => {
         <span style="color:var(--dim)">저항 L1</span> <b style="font-family:var(--mono)">${fmt(z.r1)} ~ ${fmt(z.r2)}</b></div>
       <div style="padding:4px 8px;background:rgba(45,184,126,.1);border-radius:4px;border-left:2px solid #2db87e">
         <span style="color:var(--dim)">지지 L1</span> <b style="font-family:var(--mono)">${fmt(z.s2)} ~ ${fmt(z.s1)}</b></div>
-      <div style="padding:4px 8px;background:rgba(232,122,68,.1);border-radius:4px;border-left:2px solid #e87a44">
-        <span style="color:var(--dim)">저항 L1Ext</span> <b style="font-family:var(--mono)">${fmt(z.r3)} ~ ${fmt(z.r4)}</b></div>
-      <div style="padding:4px 8px;background:rgba(34,197,94,.1);border-radius:4px;border-left:2px solid #22c55e">
-        <span style="color:var(--dim)">지지 L1Ext</span> <b style="font-family:var(--mono)">${fmt(z.s4)} ~ ${fmt(z.s3)}</b></div>
-      <div style="padding:4px 8px;background:rgba(249,115,22,.1);border-radius:4px;border-left:2px solid #f97316">
-        <span style="color:var(--dim)">저항 L2</span> <b style="font-family:var(--mono)">${fmt(z.r5)} ~ ${fmt(z.r6)}</b></div>
-      <div style="padding:4px 8px;background:rgba(6,182,212,.1);border-radius:4px;border-left:2px solid #06b6d4">
-        <span style="color:var(--dim)">지지 L2</span> <b style="font-family:var(--mono)">${fmt(z.s6)} ~ ${fmt(z.s5)}</b></div>
+      <div style="padding:4px 8px;background:rgba(255,152,0,.1);border-radius:4px;border-left:2px solid #ff9800">
+        <span style="color:var(--dim)">저항 L2</span> <b style="font-family:var(--mono)">${fmt(z.r3)} ~ ${fmt(z.r4)}</b></div>
+      <div style="padding:4px 8px;background:rgba(0,188,212,.1);border-radius:4px;border-left:2px solid #00bcd4">
+        <span style="color:var(--dim)">지지 L2</span> <b style="font-family:var(--mono)">${fmt(z.s4)} ~ ${fmt(z.s3)}</b></div>
     </div>`;
+  }
+
+  // ╔══════════════════════════════════════════╗
+  // ║  15분봉 급락 알림 시스템 (Flash Crash)        ║
+  // ╚══════════════════════════════════════════╝
+  let flashAlertOn = false;
+  let flashAlertIv = null;
+  let flashThreshold = Config.FLASH_DROP;
+  let lastFlashCandle = 0;
+  const flashLog = [];
+
+  function toggleFlashAlert() {
+    flashAlertOn = !flashAlertOn;
+    const btn = $('flash-alert-btn');
+    const st  = $('flash-alert-status');
+    if (btn) { btn.textContent = flashAlertOn ? '🔴 급락 감시 중' : '▶️ 급락 감시 시작'; btn.classList.toggle('on', flashAlertOn); }
+    if (st)  { st.textContent = flashAlertOn ? '15분봉 모니터링 중...' : '중지됨'; st.style.color = flashAlertOn ? 'var(--green)' : 'var(--dim)'; }
+    if (flashAlertOn) {
+      checkFlashCrash();
+      flashAlertIv = setInterval(checkFlashCrash, 30000);
+    } else {
+      if (flashAlertIv) clearInterval(flashAlertIv);
+    }
+  }
+
+  function setFlashThreshold(val) {
+    const v = parseFloat(val);
+    if (isNaN(v) || v < 1 || v > 15) return;
+    flashThreshold = v;
+    const display = $('flashThreshVal');
+    if (display) display.textContent = v.toFixed(1) + '%';
+  }
+
+  async function checkFlashCrash() {
+    if (!flashAlertOn) return;
+    try {
+      const raw = await API.klines(Config.SYM, '15m', 3);
+      if (!raw || raw.length < 2) return;
+      for (let idx = raw.length - 2; idx < raw.length; idx++) {
+        const c = raw[idx];
+        const open = +c[1], high = +c[2], low = +c[3], close = +c[4];
+        const candleTime = c[0];
+        const dropFromOpen = ((low - open) / open) * 100;
+        const dropClose = ((close - open) / open) * 100;
+        const maxDrop = Math.min(dropFromOpen, dropClose);
+        if (maxDrop <= -flashThreshold && candleTime !== lastFlashCandle) {
+          lastFlashCandle = candleTime;
+          const dt = new Date(candleTime);
+          const kst = new Date(dt.getTime() + 9 * 3600000);
+          const timeStr = `${String(kst.getUTCHours()).padStart(2,'0')}:${String(kst.getUTCMinutes()).padStart(2,'0')}`;
+          toast('🚨 급락 감지!', `${maxDrop.toFixed(1)}% 하락 · $${fmt(open)}→$${fmt(low)}`, '#e74c5a');
+          flashLog.unshift({ ts: timeStr, drop: maxDrop.toFixed(1), open: fmt(open), low: fmt(low), close: fmt(close) });
+          renderFlashLog();
+        }
+      }
+    } catch (e) { console.warn('Flash crash check error:', e); }
+  }
+
+  function renderFlashLog() {
+    const logEl = $('flash-alert-log');
+    const emptyEl = $('flash-alert-empty');
+    if (!logEl) return;
+    if (!flashLog.length) { if (emptyEl) emptyEl.style.display = 'block'; logEl.innerHTML = ''; return; }
+    if (emptyEl) emptyEl.style.display = 'none';
+    logEl.innerHTML = flashLog.slice(0, 30).map(a =>
+      `<div class="va"><div class="vb" style="background:rgba(231,76,90,.15);color:#e74c5a;border:1px solid rgba(231,76,90,.3)">${a.ts}</div>
+       <div class="vi"><div class="vp" style="color:var(--red);font-weight:800">${a.drop}% 급락 · $${a.open} → $${a.low}</div></div></div>`
+    ).join('');
+  }
+
+  function bindFlashControls() {
+    const slider = $('flashSlider');
+    const input  = $('flashInput');
+    if (!slider || !input) return;
+    slider.addEventListener('input', () => { input.value = slider.value; setFlashThreshold(slider.value); });
+    input.addEventListener('change', () => {
+      const v = Math.min(15, Math.max(1, parseFloat(input.value) || 3));
+      input.value = v; slider.value = v; setFlashThreshold(v);
+    });
   }
 
   // ╔══════════════════════════════════════════╗
   // ║  커스텀 가격 알림 시스템                      ║
   // ╚══════════════════════════════════════════╝
   const PA_KEY = 'btc_price_alerts';
-  let priceAlerts = [];    // [{ id, price, dir, triggered, created }]
+  let priceAlerts = [];
   const paLog     = [];
 
-  function loadPriceAlerts() {
-    try { const s = localStorage.getItem(PA_KEY); if (s) priceAlerts = JSON.parse(s); } catch {}
-  }
-  function savePriceAlerts() {
-    try { localStorage.setItem(PA_KEY, JSON.stringify(priceAlerts)); } catch {}
-  }
+  function loadPriceAlerts() { try { const s = localStorage.getItem(PA_KEY); if (s) priceAlerts = JSON.parse(s); } catch {} }
+  function savePriceAlerts() { try { localStorage.setItem(PA_KEY, JSON.stringify(priceAlerts)); } catch {} }
 
   function addPriceAlert() {
     const inp = $('price-alert-input');
@@ -3657,25 +3693,14 @@ const App = (() => {
     const price = parseFloat(inp.value);
     if (!price || price <= 0) { if (st) st.textContent = '⚠️ 유효한 가격을 입력하세요'; return; }
     if (priceAlerts.length >= 10) { if (st) st.textContent = '⚠️ 최대 10개까지 설정 가능'; return; }
-
-    priceAlerts.push({
-      id: Date.now(),
-      price,
-      dir: dir ? dir.value : 'above',
-      triggered: false,
-      created: new Date().toISOString()
-    });
+    priceAlerts.push({ id: Date.now(), price, dir: dir ? dir.value : 'above', triggered: false, created: new Date().toISOString() });
     savePriceAlerts();
     inp.value = '';
     if (st) st.textContent = `✅ $${fmt(price)} 알림 추가됨`;
     renderPriceAlerts();
   }
 
-  function removePriceAlert(id) {
-    priceAlerts = priceAlerts.filter(a => a.id !== id);
-    savePriceAlerts();
-    renderPriceAlerts();
-  }
+  function removePriceAlert(id) { priceAlerts = priceAlerts.filter(a => a.id !== id); savePriceAlerts(); renderPriceAlerts(); }
 
   function checkPriceAlerts(price) {
     let changed = false;
@@ -3683,8 +3708,7 @@ const App = (() => {
       if (a.triggered) return;
       const hit = a.dir === 'above' ? price >= a.price : price <= a.price;
       if (hit) {
-        a.triggered = true;
-        changed = true;
+        a.triggered = true; changed = true;
         const dirLabel = a.dir === 'above' ? '↑ 이상 도달' : '↓ 이하 도달';
         toast(`💰 가격 알림: $${fmt(a.price)}`, `현재 $${fmt(price)} · ${dirLabel}`, '#eab308');
         paLog.unshift({ ts: fmtKST(), price: a.price, dir: dirLabel, cur: price });
@@ -3738,9 +3762,9 @@ const App = (() => {
     tick(); setInterval(tick, 1000);
     livePrice(); setInterval(livePrice, 5000);
     bindTFButtons();
+    bindFlashControls();
     loadPriceAlerts();
     renderPriceAlerts();
-    Crash.init();
     await loadSR();
     Volume.load();
   }
@@ -3749,11 +3773,11 @@ const App = (() => {
 
   return {
     toast, go, innerGo,
-    toggleL1, toggleL1E, toggleL2,
+    toggleL1, toggleL2,
     loadHistSR, resetToLive,
     openSettings, closeSettings, saveSettings,
     openBinanceChart,
-    toggleSRAlert,
+    toggleSRAlert, toggleFlashAlert,
     addPriceAlert, removePriceAlert
   };
 })();
