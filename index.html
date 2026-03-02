@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- BTC Monitor v6 — Built 2026-03-02 06:17:58 -->
+<!-- BTC Monitor v6 — Built 2026-03-02 07:03:46 -->
 
 <html lang="ko">
 <head>
@@ -62,6 +62,12 @@ body { font-family:'Noto Sans KR',sans-serif; background:var(--bg); color:var(--
 .tab.on { background:var(--amber); color:#080a0e; }
 .tab:not(.on):hover { color:var(--text); }
 .pane { display:none; } .pane.on { display:block; }
+.inner-tabs { display:flex; gap:2px; margin:0 0 12px; background:var(--bg); border-radius:8px; padding:2px; border:1px solid var(--border); }
+.inner-tab { flex:1; padding:7px 0; border:none; border-radius:6px; background:transparent; color:var(--dim);
+  font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; white-space:nowrap; }
+.inner-tab.on { background:var(--card); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.3); }
+.inner-tab:not(.on):hover { color:var(--text); }
+.inner-pane { display:none; } .inner-pane.on { display:block; }
 
 /* ── CARDS ── */
 .c       { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:8px; }
